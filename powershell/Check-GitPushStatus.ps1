@@ -76,8 +76,8 @@ foreach ($repo in $gitRepos) {
 
                     $counts = git rev-list --left-right --count "$($branch.Branch)...$($branch.Upstream)"
                     $split = $counts -split "\s+"
-                    $behind = $split[0]
-                    $ahead = $split[1]
+                    $ahead = $split[0]
+                    $behind = $split[1]
 
                     if ($behind -gt 0 -and $ahead -gt 0) {
                         Write-Host "🚩  Branch '$($branch.Branch)' has diverged from its upstream '$($branch.Upstream)' (behind by $behind commits, ahead by $ahead commits)." -ForegroundColor Red

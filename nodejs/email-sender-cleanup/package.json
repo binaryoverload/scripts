@@ -1,0 +1,14 @@
+{
+  "name": "email-sender-cleanup",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "author": "binaryoverload",
+  "packageManager": "pnpm@10.10.0",
+  "dependencies": {
+    "@inquirer/prompts": "^7.5.1",
+    "consola": "^3.4.2",
+    "dotenv": "^16.5.0",
+    "imapflow": "^1.0.186"
+  }
+}

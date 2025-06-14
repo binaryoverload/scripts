@@ -51,8 +51,7 @@ else {
     Write-Host "npiperelay is already in system PATH."
 }
 
-# output ssh script to file
-$sshScript = @'
+$bashScript = @'
 #!/bin/bash
 
 echo "Running SSH Agent Relaying Setup..."
@@ -99,7 +98,8 @@ else
 fi
 '@
 
-$normalisedScript = $sshScript -replace "`r`n", "`n" -replace "`r", "`n"
+# Normalize line endings to Unix style and write to a file in UTF-8 without BOM encoding
+$normalisedScript = $bashScript -replace "`r`n", "`n" -replace "`r", "`n"
 [System.IO.File]::WriteAllText("setup-ssh-agent-relaying.sh", $normalisedScript, [System.Text.UTF8Encoding]::new($false))
 
 wsl bash setup-ssh-agent-relaying.sh

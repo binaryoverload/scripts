@@ -90,9 +90,34 @@ chmod +x $HOME/.ssh/.agent-bridge.sh
 echo "SSH agent bridge script created at $HOME/.ssh/.agent-bridge.sh"
 
 echo "Adding SSH agent bridge script to .bashrc..."
-echo "source $HOME/.ssh/.agent-bridge.sh" >> $HOME/.bashrc
+LINE="source $HOME/.ssh/.agent-bridge.sh"
+if ! grep -qxF "$LINE" "$HOME/.bashrc"; then
+    echo "$LINE" >> $HOME/.bashrc
+    echo "Added to .bashrc"
+else
+    echo "Already exists in .bashrc"
+fi
 '@
 
-$sshScript.Replace("`r`n", "`n") | Out-File -FilePath "setup-ssh-agent-relaying.sh" -Encoding utf8NoBOM
+$normalisedScript = $sshScript -replace "`r`n", "`n" -replace "`r", "`n"
+[System.IO.File]::WriteAllText("setup-ssh-agent-relaying.sh", $normalisedScript, [System.Text.UTF8Encoding]::new($false))
 
 wsl bash setup-ssh-agent-relaying.sh
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Failed to set up SSH agent relaying in WSL."
+    exit $LASTEXITCODE
+}
+else {
+    Write-Host "SSH agent relaying setup successfully in WSL."
+    Write-Host "Cleaning up temporary files..."
+    Remove-Item $npiperelayZipPath -Force -ErrorAction SilentlyContinue
+    Remove-Item $npiperelayExtractPath -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item "setup-ssh-agent-relaying.sh" -Force -ErrorAction SilentlyContinue
+    Write-Host "Temporary files cleaned up."
+}
+
+if ($Host.Name -eq 'ConsoleHost' -and !$psISE -and !$env:WT_SESSION) {
+    Write-Host "`nPress any key to exit..."
+    [void][System.Console]::ReadKey($true)
+}

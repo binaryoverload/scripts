@@ -88,19 +88,32 @@ EOF
 chmod +x $HOME/.ssh/.agent-bridge.sh
 echo "SSH agent bridge script created at $HOME/.ssh/.agent-bridge.sh"
 
-echo "Adding SSH agent bridge script to .bashrc..."
-LINE="source $HOME/.ssh/.agent-bridge.sh"
-if ! grep -qxF "$LINE" "$HOME/.bashrc"; then
-    echo "$LINE" >> $HOME/.bashrc
-    echo "Added to .bashrc"
+echo "Detecting shell type..."
+rcFile=""
+if [[ $SHELL == "/bin/bash" ]]; then
+    echo "Shell is $SHELL, using .bashrc"
+    rcFile="$HOME/.bashrc"
+elif [[ $SHELL == "/usr/bin/zsh" ]]; then
+    echo "Shell is $SHELL, using .zshrc"
+    rcFile="$HOME/.zshrc"
 else
-    echo "Already exists in .bashrc"
+    echo "Unsupported shell: $SHELL. Please use bash or zsh."
+    exit 1
+fi
+
+echo "Adding SSH agent bridge script to $rcFile..."
+LINE="source $HOME/.ssh/.agent-bridge.sh"
+if ! grep -qxF "$LINE" "$rcFile"; then
+    echo "$LINE" >> "$rcFile"
+    echo "Added to $rcFile"
+else
+    echo "Already exists in $rcFile"
 fi
 '@
 
 # Normalize line endings to Unix style and write to a file in UTF-8 without BOM encoding
 $normalisedScript = $bashScript -replace "`r`n", "`n" -replace "`r", "`n"
-[System.IO.File]::WriteAllText("setup-ssh-agent-relaying.sh", $normalisedScript, [System.Text.UTF8Encoding]::new($false))
+[System.IO.File]::WriteAllText("$PWD/setup-ssh-agent-relaying.sh", $normalisedScript, [System.Text.UTF8Encoding]::new($false))
 
 wsl bash setup-ssh-agent-relaying.sh
 
